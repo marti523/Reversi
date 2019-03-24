@@ -33,6 +33,7 @@ public class TileSelect : MonoBehaviour {
             if(hit.collider.gameObject.tag == ("Tile"))
             { 
                 Debug.Log(hit.collider.transform.position);
+
                 selectedTile = hit.collider.transform.position;
             }
         }
