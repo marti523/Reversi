@@ -5,29 +5,26 @@ using UnityEngine;
 public class Gameboard : MonoBehaviour {
        
     private Camera GameCamera;          //Reference to the MainCamera
-    public Logic _logic;                //References Logic script
+    public GameLogicV2 _logic;          //References Logic script
     public GameObject chipPrefab;       //Game chip prefab
     public Vector3 selectedTile;        //Tile that was clicked
 
     public GameObject[,] chips = new GameObject[8,8]; // array that holds references to the actual chips
     public int[,] owner = new int[8,8]; // array of ownership of space. 1 = player1, 2 = player2, 0 = empty 
 
-    [HideInInspector]
-    //Used only for naming the cubes in the inspector when they are created
-    public static string[] alphabet = new string[] { "a", "b", "c", "d", "e", "f", "g", "h" }; 
-
+ 
     // Use this for initialization
     void Start()
     {
         GameCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
-        _logic = GameManager.instance.gameObject.GetComponent<Logic>();
+        _logic = GameManager.instance.gameObject.GetComponent<GameLogicV2>();
         DrawBoard();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (GameManager.instance.currentTurn == 1)
+        if (_logic.playerTurn)
         {
             if (Input.GetButtonDown("Fire1"))
             {
@@ -45,22 +42,22 @@ public class Gameboard : MonoBehaviour {
     {
         //Instantiate the 4 middle tiles
         //white
-        GameObject white1 = Instantiate(chipPrefab,new Vector3(4,1,4),transform.rotation);
+        GameObject white1 = Instantiate(chipPrefab,new Vector3(4,(float).52,4),transform.rotation);
         white1.transform.Rotate(new Vector3(180, 0, 0));
         chips[4, 4] = white1;
         owner[4, 4] = 1;
         
-        GameObject white2 = Instantiate(chipPrefab, new Vector3(3, 1, 3), transform.rotation);
+        GameObject white2 = Instantiate(chipPrefab, new Vector3(3, (float).52, 3), transform.rotation);
         white2.transform.Rotate(new Vector3(180, 0, 0));
         chips[3, 3] = white2;
         owner[3, 3] = 1;
         
         //black
-        GameObject black1 = Instantiate(chipPrefab, new Vector3(4, 1, 3), transform.rotation);
+        GameObject black1 = Instantiate(chipPrefab, new Vector3(4, (float).52, 3), transform.rotation);
         chips[4, 3] = black1;
         owner[4, 3] = 2;
         
-        GameObject black2 = Instantiate(chipPrefab, new Vector3(3, 1, 4), transform.rotation);
+        GameObject black2 = Instantiate(chipPrefab, new Vector3(3, (float).52, 4), transform.rotation);
         chips[3, 4] = black2;
         owner[3, 4] = 2;
     }
@@ -84,31 +81,29 @@ public class Gameboard : MonoBehaviour {
                 {
                     px = (int)hit.collider.transform.position.x;
                     py = (int)hit.collider.transform.position.z;
-                Debug.Log("HIT");
-                    if (owner[px, py] == 0)
+                    Debug.Log("HIT at (" +px+","+py+")");
+                   
+                    if (_logic.isMove(px,py, owner))
                     {
-                    Debug.Log("NO OWNER");
-                        if(_logic.checkValid(px,py))
-                        {
                         Debug.Log("Valid space");
-                            //instantiate the piece at the currect position
-                            selectedTile = hit.collider.transform.position;
-                            selectedTile.y = 1;
-                            GameManager.instance.placePiece(selectedTile);
+                        //instantiate the piece at the currect position
+                        selectedTile = hit.collider.transform.position;
+                        selectedTile.y = .52F;
+                        GameObject newPiece = Instantiate(chipPrefab, selectedTile, transform.rotation);
+                        newPiece.transform.Rotate(180,0,0);
+                    
+                        //update the board
+                        chips[px, py] = newPiece;
+                        owner[px, py] = 1;
+                        _logic.remainingMoves--;
 
-                            //update the board
-                            owner[px, py] = 1;
-                            GameManager.instance.totalSpacesLeft--;
-
-                            _logic.findTakenPieces(px,py);
-                        }
-                    }
-
+                        //Take enemy pieces
+                        _logic.findTaken(px, py, owner, true);
+                        _logic.playerTurn = false;
+                    }                    
                 }
             
             }
 
     }
-
-
 }
