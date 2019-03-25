@@ -14,8 +14,8 @@ public class GameLogicV2 : MonoBehaviour {
     public GameObject chipPrefab;      //prefab for the chip 
     public bool playerTurn = true;     //if true, then it's the player's turn
     public int remainingMoves = 60;    //the number of remaining moves before board fills up
-    public int newdepth = 5;                  //curr depth
-    public int difficulty = 10;        //the max depth of the search
+    //public int newdepth = 5;                  //curr depth
+    private int difficulty = 4;        //the max depth of the search
     public bool gameOver = false;
 
     public Text playerScore;
