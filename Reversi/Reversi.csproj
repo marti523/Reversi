@@ -325,7 +325,6 @@
     <Compile Include="Assets\_Scripts\Gameboard.cs" />
     <Compile Include="Assets\_Scripts\GameLogicV2.cs" />
     <Compile Include="Assets\_Scripts\GameManager.cs" />
-    <Compile Include="Assets\_Scripts\TileSelect.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Plugins\GitHub\Editor\credits.txt" />

@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class Gameboard : MonoBehaviour {
        
@@ -8,6 +10,8 @@ public class Gameboard : MonoBehaviour {
     public GameLogicV2 _logic;          //References Logic script
     public GameObject chipPrefab;       //Game chip prefab
     public Vector3 selectedTile;        //Tile that was clicked
+
+    public Text notification;
 
     public GameObject[,] chips = new GameObject[8,8]; // array that holds references to the actual chips
     public int[,] owner = new int[8,8]; // array of ownership of space. 1 = player1, 2 = player2, 0 = empty 
@@ -21,14 +25,64 @@ public class Gameboard : MonoBehaviour {
         DrawBoard();
     }
 
+    void Awake()
+    {
+
+        
+    }
+
     // Update is called once per frame
     void Update()
     {
-        if (_logic.playerTurn)
+        if (_logic.gameOver)
         {
-            if (Input.GetButtonDown("Fire1"))
+            int[] scores = _logic.countScore(owner, false);
+            if(scores[0] > scores[1])
             {
-                GetMouseInputs();
+                notification.text = "Player 1 Wins!";
+            }
+            else if(scores[0]<scores[1])
+            {
+                notification.text = "AI Wins!";
+            }
+            else if(scores[0] == scores[1])
+            {
+                notification.text = "DRAW!";
+            }
+            return;
+        }
+        else
+        { 
+            if(_logic.remainingMoves == 0)
+            {
+                _logic.gameOver = true;
+                return;
+            }
+            if (_logic.movesAvailable() == false)
+            {
+                int[] scores = _logic.countScore(owner, false);
+                if (scores[0] * scores[1] == 0)
+                    _logic.gameOver = true;
+                else
+                {
+                    string currPlayer = _logic.playerTurn ? "PLAYER 1" : "AI";
+                    notification.text = currPlayer + " had no moves available!";
+                    _logic.playerTurn = !_logic.playerTurn;
+                }
+                return;
+            }
+            if (_logic.playerTurn)
+            {
+                if (Input.GetButtonDown("Fire1"))
+                {
+                    GetMouseInputs();
+                    _logic.updateScore();
+                }
+            }
+            else
+            {
+                _logic.AITurn();
+                _logic.updateScore();
             }
         }
     }
